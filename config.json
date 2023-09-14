@@ -1,0 +1,19 @@
+{
+  "products": [
+    {
+      "product_name": "VelocityVanish",
+      "channel_id": "1149387625275330620",
+      "message_id": "1149441902815485974"
+    },
+    {
+      "product_name": "VelocityReport",
+      "channel_id": "1149400232690466886",
+      "message_id": "1149441906581962782"
+    },
+    {
+      "product_name": "Wanted",
+      "channel_id": "1149403371988602972",
+      "message_id": "1149441910293934122"
+    }
+  ]
+}
