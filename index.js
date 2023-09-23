@@ -28,6 +28,7 @@ client.once('ready', () => {
 
 client.login(TOKEN);
 
+
 async function updateProductEmbeds() {
   for (const product of productsConfig.products) {
     try {
@@ -43,6 +44,37 @@ async function updateProductEmbeds() {
       const guildId = 'GUILD-ID';
       const guild = client.guilds.cache.get(guildId);
       const channel = guild.channels.cache.get(product.channel_id);
+
+      try {
+        const response = await axios.get(`https://hangar.papermc.io/api/v1/projects/${product.product_name}/versions?limit=2`);
+        const latestVersion = response.data.result[0];
+  
+        const lastCheckedVersion = product.last_checked_version || '';
+  
+        if (latestVersion.name !== lastCheckedVersion) {
+          product.last_checked_version = latestVersion.name;
+          fs.writeFileSync('config.json', JSON.stringify(productsConfig, null, 2));
+          const content = `<@&${product.role_id}>`;
+
+          const embed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`📈 New [${latestVersion.channel.name}] Update ${latestVersion.name} | ${product.product_name}`)
+            .setThumbnail(projectData.avatarUrl)
+            .setURL(`https://hangar.papermc.io/${projectData.namespace.owner}/${product.product_name}/versions/${latestVersion.name}`)
+            .setDescription(`${latestVersion.description}`)
+            .setTimestamp()
+            .setFooter(`🧑‍💻 ${projectData.namespace.owner}`);
+  
+          const updateChannel = client.channels.cache.get(product.update_id);
+          if (updateChannel) {
+            updateChannel.send({ content, embeds: [embed] });
+          } else {
+            console.error(`Invalid update_id channel for ${product.product_name}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching data for ${product.product_name}: ${error.message}`);
+      }
 
       function formatTimeDifference(lastUpdated) {
         const currentDate = new Date();
@@ -124,7 +156,7 @@ async function updateProductEmbeds() {
         .setColor('#0099ff')
         .setTitle(`${product.product_name} - ${ReleaseVersion.result[0].name}`)
         .setDescription(`📒 ${projectData.description}\n♻️ Last Update : **${formattedTimeAgo}**`)
-        .setURL(`https://hangar.papermc.io/${projectData.namespace.owner}/${projectData.product_name}`)
+        .setURL(`https://hangar.papermc.io/${projectData.namespace.owner}/${product.product_name}`)
         .setThumbnail(projectData.avatarUrl)
         .addFields(
           { name: '\u200b\n🌐 Information', value: informationValue, inline: true },
